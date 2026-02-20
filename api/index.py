@@ -1,349 +1,42 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from typing import List
+import json
+import statistics
+import numpy as np
 
 app = FastAPI()
 
-# Enable CORS for POST requests from any origin
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["POST", "OPTIONS", "GET"],
+    allow_methods=["POST"],
     allow_headers=["*"],
 )
 
-# Request model
-class MetricsRequest(BaseModel):
-    regions: List[str]
-    threshold_ms: int
-
 # Load telemetry data
-TELEMETRY_DATA = [
-  {
-    "region": "apac",
-    "service": "analytics",
-    "latency_ms": 161.13,
-    "uptime_pct": 98.885,
-    "timestamp": 20250301
-  },
-  {
-    "region": "apac",
-    "service": "recommendations",
-    "latency_ms": 136.44,
-    "uptime_pct": 97.932,
-    "timestamp": 20250302
-  },
-  {
-    "region": "apac",
-    "service": "catalog",
-    "latency_ms": 112.87,
-    "uptime_pct": 99.392,
-    "timestamp": 20250303
-  },
-  {
-    "region": "apac",
-    "service": "catalog",
-    "latency_ms": 200.6,
-    "uptime_pct": 98.691,
-    "timestamp": 20250304
-  },
-  {
-    "region": "apac",
-    "service": "analytics",
-    "latency_ms": 229.45,
-    "uptime_pct": 98.264,
-    "timestamp": 20250305
-  },
-  {
-    "region": "apac",
-    "service": "catalog",
-    "latency_ms": 109.71,
-    "uptime_pct": 99.056,
-    "timestamp": 20250306
-  },
-  {
-    "region": "apac",
-    "service": "analytics",
-    "latency_ms": 153.96,
-    "uptime_pct": 97.782,
-    "timestamp": 20250307
-  },
-  {
-    "region": "apac",
-    "service": "payments",
-    "latency_ms": 228.25,
-    "uptime_pct": 97.629,
-    "timestamp": 20250308
-  },
-  {
-    "region": "apac",
-    "service": "recommendations",
-    "latency_ms": 157.65,
-    "uptime_pct": 97.504,
-    "timestamp": 20250309
-  },
-  {
-    "region": "apac",
-    "service": "recommendations",
-    "latency_ms": 216.55,
-    "uptime_pct": 98.928,
-    "timestamp": 20250310
-  },
-  {
-    "region": "apac",
-    "service": "analytics",
-    "latency_ms": 147.5,
-    "uptime_pct": 98.562,
-    "timestamp": 20250311
-  },
-  {
-    "region": "apac",
-    "service": "catalog",
-    "latency_ms": 151.94,
-    "uptime_pct": 98.874,
-    "timestamp": 20250312
-  },
-  {
-    "region": "emea",
-    "service": "catalog",
-    "latency_ms": 165.78,
-    "uptime_pct": 99.03,
-    "timestamp": 20250301
-  },
-  {
-    "region": "emea",
-    "service": "support",
-    "latency_ms": 129.11,
-    "uptime_pct": 99.094,
-    "timestamp": 20250302
-  },
-  {
-    "region": "emea",
-    "service": "support",
-    "latency_ms": 179.75,
-    "uptime_pct": 98.017,
-    "timestamp": 20250303
-  },
-  {
-    "region": "emea",
-    "service": "analytics",
-    "latency_ms": 120.95,
-    "uptime_pct": 97.56,
-    "timestamp": 20250304
-  },
-  {
-    "region": "emea",
-    "service": "recommendations",
-    "latency_ms": 155.19,
-    "uptime_pct": 99.207,
-    "timestamp": 20250305
-  },
-  {
-    "region": "emea",
-    "service": "support",
-    "latency_ms": 158.42,
-    "uptime_pct": 99.358,
-    "timestamp": 20250306
-  },
-  {
-    "region": "emea",
-    "service": "payments",
-    "latency_ms": 199.99,
-    "uptime_pct": 98.323,
-    "timestamp": 20250307
-  },
-  {
-    "region": "emea",
-    "service": "checkout",
-    "latency_ms": 188.9,
-    "uptime_pct": 97.884,
-    "timestamp": 20250308
-  },
-  {
-    "region": "emea",
-    "service": "support",
-    "latency_ms": 192.04,
-    "uptime_pct": 97.962,
-    "timestamp": 20250309
-  },
-  {
-    "region": "emea",
-    "service": "analytics",
-    "latency_ms": 203.31,
-    "uptime_pct": 98.636,
-    "timestamp": 20250310
-  },
-  {
-    "region": "emea",
-    "service": "recommendations",
-    "latency_ms": 229.21,
-    "uptime_pct": 99.184,
-    "timestamp": 20250311
-  },
-  {
-    "region": "emea",
-    "service": "checkout",
-    "latency_ms": 177.04,
-    "uptime_pct": 98.199,
-    "timestamp": 20250312
-  },
-  {
-    "region": "amer",
-    "service": "catalog",
-    "latency_ms": 168.36,
-    "uptime_pct": 97.641,
-    "timestamp": 20250301
-  },
-  {
-    "region": "amer",
-    "service": "payments",
-    "latency_ms": 131.6,
-    "uptime_pct": 98.915,
-    "timestamp": 20250302
-  },
-  {
-    "region": "amer",
-    "service": "payments",
-    "latency_ms": 200.68,
-    "uptime_pct": 98.611,
-    "timestamp": 20250303
-  },
-  {
-    "region": "amer",
-    "service": "checkout",
-    "latency_ms": 117.33,
-    "uptime_pct": 98.436,
-    "timestamp": 20250304
-  },
-  {
-    "region": "amer",
-    "service": "payments",
-    "latency_ms": 142.77,
-    "uptime_pct": 98.358,
-    "timestamp": 20250305
-  },
-  {
-    "region": "amer",
-    "service": "catalog",
-    "latency_ms": 153.5,
-    "uptime_pct": 97.491,
-    "timestamp": 20250306
-  },
-  {
-    "region": "amer",
-    "service": "catalog",
-    "latency_ms": 175.81,
-    "uptime_pct": 98.549,
-    "timestamp": 20250307
-  },
-  {
-    "region": "amer",
-    "service": "payments",
-    "latency_ms": 142.15,
-    "uptime_pct": 98.006,
-    "timestamp": 20250308
-  },
-  {
-    "region": "amer",
-    "service": "catalog",
-    "latency_ms": 130.64,
-    "uptime_pct": 98.317,
-    "timestamp": 20250309
-  },
-  {
-    "region": "amer",
-    "service": "analytics",
-    "latency_ms": 190.65,
-    "uptime_pct": 97.873,
-    "timestamp": 20250310
-  },
-  {
-    "region": "amer",
-    "service": "catalog",
-    "latency_ms": 161.23,
-    "uptime_pct": 97.904,
-    "timestamp": 20250311
-  },
-  {
-    "region": "amer",
-    "service": "checkout",
-    "latency_ms": 212.51,
-    "uptime_pct": 97.404,
-    "timestamp": 20250312
-  }
-]
-
-
-def percentile(data, p):
-    """Calculate percentile without numpy"""
-    sorted_data = sorted(data)
-    index = int(len(sorted_data) * p / 100)
-    return sorted_data[min(index, len(sorted_data) - 1)]
-
+with open("q-vercel-latency.json") as f:
+    data = json.load(f)
 
 @app.post("/api/metrics")
-async def get_metrics(request: MetricsRequest):
-    """
-    Calculate per-region metrics for latency and uptime.
-    
-    Request body: {"regions": [...], "threshold_ms": 180}
-    Response: {"regions": {region: {metrics}}}
-    """
-    regions = request.regions
-    threshold_ms = request.threshold_ms
-    
-    result = {"regions": {}}
-    
-    for region in regions:
-        # Filter data for this region
-        region_data = [r for r in TELEMETRY_DATA if r["region"] == region]
-        
-        if not region_data:
-            continue
-        
-        latencies = [r["latency_ms"] for r in region_data]
-        uptimes = [r["uptime_pct"] for r in region_data]
-        
-        # Calculate metrics
-        avg_latency = sum(latencies) / len(latencies)
-        p95_latency = percentile(latencies, 95)
-        avg_uptime = sum(uptimes) / len(uptimes)
-        breaches = sum(1 for l in latencies if l > threshold_ms)
-        
-        result["regions"][region] = {
-            "avg_latency": round(avg_latency, 2),
-            "p95_latency": round(p95_latency, 2),
-            "avg_uptime": round(avg_uptime, 2),
-            "breaches": breaches
+async def metrics(req: Request):
+    body = await req.json()
+    regions = body["regions"]
+    threshold = body["threshold_ms"]
+
+    result = {}
+
+    for r in regions:
+        records = [d for d in data if d["region"] == r]
+
+        latencies = [d["latency_ms"] for d in records]
+        uptimes = [d["uptime_pct"] for d in records]
+
+        result[r] = {
+            "avg_latency": round(statistics.mean(latencies), 2),
+            "p95_latency": round(np.percentile(latencies, 95), 2),
+            "avg_uptime": round(statistics.mean(uptimes), 2),
+            "breaches": sum(1 for l in latencies if l > threshold)
         }
-    
-    return JSONResponse(
-        result,
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        }
-    )
 
-
-@app.options("/api/metrics")
-async def preflight():
-    """Handle CORS preflight requests"""
-    return JSONResponse(
-        {"status": "ok"},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        }
-    )
-
-
-# Health check endpoint
-@app.get("/api/health")
-async def health():
-    return {"status": "healthy"}
+    return result
