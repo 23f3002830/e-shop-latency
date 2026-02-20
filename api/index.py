@@ -1,8 +1,7 @@
-import json
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import numpy as np
+from pydantic import BaseModel
+from typing import List
 
 app = FastAPI()
 
@@ -14,6 +13,11 @@ app.add_middleware(
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Request model
+class MetricsRequest(BaseModel):
+    regions: List[str]
+    threshold_ms: int
 
 # Load telemetry data
 TELEMETRY_DATA = [
@@ -272,16 +276,23 @@ TELEMETRY_DATA = [
 ]
 
 
+def percentile(data, p):
+    """Calculate percentile without numpy"""
+    sorted_data = sorted(data)
+    index = int(len(sorted_data) * p / 100)
+    return sorted_data[min(index, len(sorted_data) - 1)]
+
+
 @app.post("/api/metrics")
-async def get_metrics(request: dict):
+async def get_metrics(request: MetricsRequest):
     """
     Calculate per-region metrics for latency and uptime.
     
     Request body: {"regions": [...], "threshold_ms": 180}
     Response: {"regions": {region: {metrics}}}
     """
-    regions = request.get("regions", [])
-    threshold_ms = request.get("threshold_ms", 180)
+    regions = request.regions
+    threshold_ms = request.threshold_ms
     
     result = {"regions": {}}
     
@@ -296,9 +307,9 @@ async def get_metrics(request: dict):
         uptimes = [r["uptime_pct"] for r in region_data]
         
         # Calculate metrics
-        avg_latency = float(np.mean(latencies))
-        p95_latency = float(np.percentile(latencies, 95))
-        avg_uptime = float(np.mean(uptimes))
+        avg_latency = sum(latencies) / len(latencies)
+        p95_latency = percentile(latencies, 95)
+        avg_uptime = sum(uptimes) / len(uptimes)
         breaches = sum(1 for l in latencies if l > threshold_ms)
         
         result["regions"][region] = {
@@ -308,7 +319,7 @@ async def get_metrics(request: dict):
             "breaches": breaches
         }
     
-    return JSONResponse(result)
+    return result
 
 
 # Health check endpoint
