@@ -1,0 +1,17 @@
+[
+  {"region": "us-east-1", "latency_ms": 45, "uptime_pct": 99.9},
+  {"region": "us-east-1", "latency_ms": 52, "uptime_pct": 99.95},
+  {"region": "us-east-1", "latency_ms": 38, "uptime_pct": 99.85},
+  {"region": "us-east-1", "latency_ms": 48, "uptime_pct": 99.92},
+  {"region": "us-east-1", "latency_ms": 55, "uptime_pct": 99.88},
+  {"region": "us-west-2", "latency_ms": 65, "uptime_pct": 99.8},
+  {"region": "us-west-2", "latency_ms": 72, "uptime_pct": 99.75},
+  {"region": "us-west-2", "latency_ms": 58, "uptime_pct": 99.9},
+  {"region": "us-west-2", "latency_ms": 68, "uptime_pct": 99.82},
+  {"region": "us-west-2", "latency_ms": 75, "uptime_pct": 99.78},
+  {"region": "eu-west-1", "latency_ms": 85, "uptime_pct": 99.7},
+  {"region": "eu-west-1", "latency_ms": 92, "uptime_pct": 99.65},
+  {"region": "eu-west-1", "latency_ms": 78, "uptime_pct": 99.8},
+  {"region": "eu-west-1", "latency_ms": 88, "uptime_pct": 99.72},
+  {"region": "eu-west-1", "latency_ms": 95, "uptime_pct": 99.68}
+]
