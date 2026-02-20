@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List
 
@@ -9,8 +10,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["POST", "OPTIONS"],
+    allow_credentials=False,
+    allow_methods=["POST", "OPTIONS", "GET"],
     allow_headers=["*"],
 )
 
@@ -319,7 +320,27 @@ async def get_metrics(request: MetricsRequest):
             "breaches": breaches
         }
     
-    return result
+    return JSONResponse(
+        result,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        }
+    )
+
+
+@app.options("/api/metrics")
+async def preflight():
+    """Handle CORS preflight requests"""
+    return JSONResponse(
+        {"status": "ok"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        }
+    )
 
 
 # Health check endpoint
